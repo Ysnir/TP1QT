@@ -77,6 +77,7 @@ void MainWidget::mousePressEvent(QMouseEvent *e)
 {
     // Save mouse press position
     mousePressPosition = QVector2D(e->localPos());
+    angularSpeed=0;
 }
 
 void MainWidget::mouseReleaseEvent(QMouseEvent *e)
@@ -98,6 +99,33 @@ void MainWidget::mouseReleaseEvent(QMouseEvent *e)
     angularSpeed += acc;
 }
 //! [0]
+
+void MainWidget::keyPressEvent(QKeyEvent *event) {
+    if(event->key() == Qt::Key_Up) {
+        projection.translate(0.0f, 0.1f, 0.0f);
+        update();
+    }
+    if(event->key() == Qt::Key_Down) {
+         projection.translate(0.0f, -0.1f, 0.0f);
+         update();
+    }
+    if(event->key() == Qt::Key_Left) {
+         projection.translate(-0.1f, 0.0f, 0.0f);
+         update();
+    }
+    if(event->key() == Qt::Key_Right) {
+         projection.translate(0.1f, 0.0f, 0.0f);
+         update();
+    }
+    if(event->key() == Qt::Key_Minus) {
+         projection.translate(0.0f, 0.0f, -0.1f);
+         update();
+    }
+    if(event->key() == Qt::Key_Plus) {
+         projection.translate(0.0f, 0.0f, 0.1f);
+         update();
+    }
+}
 
 //! [1]
 void MainWidget::timerEvent(QTimerEvent *)
@@ -218,5 +246,5 @@ void MainWidget::paintGL()
     program.setUniformValue("texture", 0);
 
     // Draw cube geometry
-    geometries->drawCubeGeometry(&program);
+    geometries->drawPlaneGeometry(&program);
 }
