@@ -52,6 +52,8 @@
 
 #include <QVector2D>
 #include <QVector3D>
+#include <QFile>
+#include <QImage>
 
 struct VertexData
 {
@@ -70,7 +72,7 @@ GeometryEngine::GeometryEngine()
     indexBuf.create();
 
     // Initializes cube geometry and transfers it to VBOs
-    initPlaneGeometry(16);
+    initPlaneHeightMapImgFileGeometry(256);
 }
 
 GeometryEngine::~GeometryEngine()
@@ -225,6 +227,87 @@ void GeometryEngine::initPlaneGeometry(int size)
     //! [3]
 }
 
+void GeometryEngine::initPlaneHeightMapTextFileGeometry(int size)
+{
+    VertexData *vertices = new VertexData[size*size];
+
+    QFile inputFile("/auto_home/ydesmarais/Documents/MoteurJeux/TP1QT/hmin317-tp1-master/heightmap.dat");
+    if (inputFile.open(QIODevice::ReadOnly))
+    {
+       QTextStream in(&inputFile);
+       float height;
+       for(int i=0; i<size; i++) {
+            for(int j=0; j<size; j++) {
+                QString line = in.readLine();
+                height = line.toFloat();
+                VertexData v = {QVector3D(((float)i)/(size-1), ((float)j)/(size-1), height), QVector2D((float)i/(size-1)/3, (float)j/(size-1)/2)};
+                vertices[i*size+j] = v;
+            }
+        }
+
+        inputFile.close();
+
+    } else {
+        qInfo("fail to open text file");
+    }
+
+    GLushort *indices = new GLushort[6*(size-1)*(size-1)];
+    for(int i=0; i<size-1; i++) {
+        for(int j=0; j<size-1; j++) {
+            indices[(i*(size-1)+j)*6] = i + (j*size);
+            indices[(i*(size-1)+j)*6+1] = i + size + (j*size);
+            indices[(i*(size-1)+j)*6+2] = 1 + i +(j*size);
+            indices[(i*(size-1)+j)*6+3] = i + size + 1 + (j*size);
+            indices[(i*(size-1)+j)*6+4] = i + 1 + (j*size);
+            indices[(i*(size-1)+j)*6+5] = size + i + (j*size);
+        }
+    }
+
+        // Transfer vertex data to VBO 0
+        arrayBuf.bind();
+        arrayBuf.allocate(vertices, (size*size) * sizeof(VertexData));
+
+        // Transfer index data to VBO 1
+        indexBuf.bind();
+        indexBuf.allocate(indices, (6*(size-1)*(size-1)) * sizeof(GLushort));
+}
+
+void GeometryEngine::initPlaneHeightMapImgFileGeometry(int size)
+{
+    VertexData *vertices = new VertexData[size*size];
+    QImage myImage;
+    myImage.load("/auto_home/ydesmarais/Documents/MoteurJeux/TP1QT/hmin317-tp1-master/bump.png");
+
+       for(int i=0; i<size; i++) {
+            for(int j=0; j<size; j++) {
+                int redLevel = qRed(myImage.pixel(i, j));
+                float height = (float)(redLevel) / 256;
+                VertexData v = {QVector3D(((float)i)/(size-1), ((float)j)/(size-1), height), QVector2D((float)i/(size-1)/3, (float)j/(size-1)/2)};
+                vertices[i*size+j] = v;
+            }
+        }
+
+    GLushort *indices = new GLushort[6*(size-1)*(size-1)];
+    for(int i=0; i<size-1; i++) {
+        for(int j=0; j<size-1; j++) {
+            indices[(i*(size-1)+j)*6] = i + (j*size);
+            indices[(i*(size-1)+j)*6+1] = i + size + (j*size);
+            indices[(i*(size-1)+j)*6+2] = 1 + i +(j*size);
+            indices[(i*(size-1)+j)*6+3] = i + size + 1 + (j*size);
+            indices[(i*(size-1)+j)*6+4] = i + 1 + (j*size);
+            indices[(i*(size-1)+j)*6+5] = size + i + (j*size);
+        }
+    }
+
+        // Transfer vertex data to VBO 0
+        arrayBuf.bind();
+        arrayBuf.allocate(vertices, (size*size) * sizeof(VertexData));
+
+        // Transfer index data to VBO 1
+        indexBuf.bind();
+        indexBuf.allocate(indices, (6*(size-1)*(size-1)) * sizeof(GLushort));
+}
+
 //! [4]
 void GeometryEngine::drawPlaneGeometry(QOpenGLShaderProgram *program)
 {
@@ -249,6 +332,6 @@ void GeometryEngine::drawPlaneGeometry(QOpenGLShaderProgram *program)
     program->setAttributeBuffer(texcoordLocation, GL_FLOAT, offset, 2, sizeof(VertexData));
 
     // Draw cube geometry using indices from VBO 1
-    glDrawElements(GL_TRIANGLES, 10000, GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES, 10000000, GL_UNSIGNED_SHORT, 0);
 }
 //! [4]

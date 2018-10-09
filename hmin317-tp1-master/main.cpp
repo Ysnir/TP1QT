@@ -51,6 +51,7 @@
 #include <QApplication>
 #include <QLabel>
 #include <QSurfaceFormat>
+#include <QFile>
 
 #ifndef QT_NO_OPENGL
 #include "mainwidget.h"
