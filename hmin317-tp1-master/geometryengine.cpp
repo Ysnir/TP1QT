@@ -72,7 +72,7 @@ GeometryEngine::GeometryEngine()
     indexBuf.create();
 
     // Initializes cube geometry and transfers it to VBOs
-    initPlaneHeightMapImgFileGeometry(256);
+    initPlaneHeightMapImgFileGeometry(256, -0.5, -0.5);
 }
 
 GeometryEngine::~GeometryEngine()
@@ -272,17 +272,17 @@ void GeometryEngine::initPlaneHeightMapTextFileGeometry(int size)
         indexBuf.allocate(indices, (6*(size-1)*(size-1)) * sizeof(GLushort));
 }
 
-void GeometryEngine::initPlaneHeightMapImgFileGeometry(int size)
+void GeometryEngine::initPlaneHeightMapImgFileGeometry(int size, float x0, float y0)
 {
     VertexData *vertices = new VertexData[size*size];
     QImage myImage;
-    myImage.load("/auto_home/ydesmarais/Documents/MoteurJeux/TP1QT/hmin317-tp1-master/bump.png");
+    myImage.load("/auto_home/ydesmarais/Documents/MoteurJeux/TP1QT/hmin317-tp1-master/bump2.png");
 
        for(int i=0; i<size; i++) {
             for(int j=0; j<size; j++) {
                 int redLevel = qRed(myImage.pixel(i, j));
                 float height = (float)(redLevel) / 256;
-                VertexData v = {QVector3D(((float)i)/(size-1), ((float)j)/(size-1), height), QVector2D((float)i/(size-1)/3, (float)j/(size-1)/2)};
+                VertexData v = {QVector3D(((float)i)/(size-1)+x0, ((float)j)/(size-1)+y0, height), QVector2D((float)i/(size-1)/3, (float)j/(size-1)/2)};
                 vertices[i*size+j] = v;
             }
         }

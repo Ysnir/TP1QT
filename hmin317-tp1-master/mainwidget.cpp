@@ -54,11 +54,12 @@
 
 #include <math.h>
 
-MainWidget::MainWidget(QWidget *parent) :
+MainWidget::MainWidget(int fps,QWidget *parent) :
     QOpenGLWidget(parent),
     geometries(0),
     texture(0),
-    angularSpeed(0)
+    angularSpeed(1.0f),
+    fps(fps)
 {
 }
 
@@ -125,16 +126,34 @@ void MainWidget::keyPressEvent(QKeyEvent *event) {
          projection.translate(0.0f, 0.0f, 0.1f);
          update();
     }
+
+    //FPS managment
+    if(event->key() == Qt::Key_Control) {
+         angularSpeed -= 0.1;
+         update();
+    }
+
+    if(event->key() == Qt::Key_Shift) {
+        angularSpeed += 0.1;
+        update();
+    }
 }
 
 //! [1]
 void MainWidget::timerEvent(QTimerEvent *)
 {
-    // Decrease angular speed (friction)
-    angularSpeed *= 0.99;
+    // Decrease angular speed (friction) TO UNCOMMENT if mouse controlled rotation
+    //angularSpeed *= 0.99;
 
+    QVector3D rotationVector(0.0f, 1.0f, 1.0f);
+
+    //Automatic rotation of camera. COMMENT to add mouse controled rotation
+    rotation = QQuaternion::fromAxisAndAngle(rotationVector, angularSpeed) * rotation;
+    update();
+
+    //Mouse controled rotation of the camera  TO UNCOMMENT if mouse controlled rotation
     // Stop rotation when speed goes below threshold
-    if (angularSpeed < 0.01) {
+    /*if (angularSpeed < 0.01) {
         angularSpeed = 0.0;
     } else {
         // Update rotation
@@ -142,7 +161,7 @@ void MainWidget::timerEvent(QTimerEvent *)
 
         // Request an update
         update();
-    }
+    }*/
 }
 //! [1]
 
@@ -166,7 +185,7 @@ void MainWidget::initializeGL()
     geometries = new GeometryEngine;
 
     // Use QBasicTimer because its faster than QTimer
-    timer.start(12, this);
+    timer.start(1000/fps, this);
 }
 
 //! [3]
@@ -213,6 +232,10 @@ void MainWidget::resizeGL(int w, int h)
 {
     // Calculate aspect ratio
     qreal aspect = qreal(w) / qreal(h ? h : 1);
+
+    QVector3D initialRotationVector(1.0f, 0.0f, 0.0f);
+
+    rotation = QQuaternion::fromAxisAndAngle(initialRotationVector, -45.0f) ;
 
     // Set near plane to 3.0, far plane to 7.0, field of view 45 degrees
     const qreal zNear = 3.0, zFar = 7.0, fov = 45.0;

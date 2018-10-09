@@ -69,7 +69,7 @@ class MainWidget : public QOpenGLWidget, protected QOpenGLFunctions
     Q_OBJECT
 
 public:
-    explicit MainWidget(QWidget *parent = 0);
+    explicit MainWidget(int fps, QWidget *parent = 0);
     ~MainWidget();
 
 protected:
@@ -86,6 +86,7 @@ protected:
     void initTextures();
 
 private:
+    int fps;
     QBasicTimer timer;
     QOpenGLShaderProgram program;
     GeometryEngine *geometries;

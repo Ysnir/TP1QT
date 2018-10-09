@@ -69,7 +69,7 @@ private:
     void initCubeGeometry();
     void initPlaneGeometry(int size);
     void initPlaneHeightMapTextFileGeometry(int size);
-    void initPlaneHeightMapImgFileGeometry(int size);
+    void initPlaneHeightMapImgFileGeometry(int size, float x0, float y0);
 
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;
